@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A–Z Resource Vault</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: #fdf8f4;
+    color: #3a3a3a;
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, #b07d9e 0%, #7b9eb8 100%);
+    color: white;
+    text-align: center;
+    padding: 40px 20px 30px;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4em;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  header p {
+    font-size: 0.95em;
+    opacity: 0.88;
+    letter-spacing: 1px;
+    font-weight: 300;
+  }
+
+  /* Filter bar */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 20px 20px 10px;
+    background: #fdf8f4;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #e8ddd5;
+  }
+
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid #c9a8bb;
+    background: white;
+    color: #b07d9e;
+    font-size: 0.78em;
+    font-family: 'Lato', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    background: #b07d9e;
+    color: white;
+    border-color: #b07d9e;
+  }
+
+  /* A–Z jump bar */
+  .az-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 16px;
+    background: #fdf8f4;
+  }
+
+  .az-bar a {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78em;
+    font-weight: 700;
+    color: #8a6d7e;
+    text-decoration: none;
+    border-radius: 50%;
+    transition: all 0.2s;
+  }
+
+  .az-bar a:hover {
+    background: #b07d9e;
+    color: white;
+  }
+
+  .az-bar a.empty {
+    color: #ccc;
+    pointer-events: none;
+  }
+
+  /* Main content */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 20px 20px 60px;
+  }
+
+  .letter-section {
+    margin-bottom: 28px;
+  }
+
+  .letter-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 2em;
+    color: #b07d9e;
+    border-bottom: 2px solid #e8c9d8;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .letter-heading span.count {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.4em;
+    color: #aaa;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .session-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border-left: 4px solid #ddd;
+    transition: box-shadow 0.2s;
+    gap: 12px;
+  }
+
+  .session-card:hover {
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+  }
+
+  .session-card.cat-health-emotional { border-left-color: #c97bab; }
+  .session-card.cat-health-physical  { border-left-color: #7ab8a0; }
+  .session-card.cat-health-mental    { border-left-color: #7aa3c9; }
+  .session-card.cat-selfgrowth       { border-left-color: #e8a87c; }
+  .session-card.cat-business         { border-left-color: #a09adc; }
+  .session-card.cat-none             { border-left-color: #ccc; }
+
+  .session-info { flex: 1; }
+
+  .session-name {
+    font-weight: 700;
+    font-size: 0.97em;
+    margin-bottom: 4px;
+    color: #2e2e2e;
+  }
+
+  .session-tag {
+    display: inline-block;
+    font-size: 0.72em;
+    padding: 2px 9px;
+    border-radius: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .tag-health-emotional { background: #f5e0ef; color: #9a4d7a; }
+  .tag-health-physical  { background: #d9f0e8; color: #2e7a5e; }
+  .tag-health-mental    { background: #d9eaf7; color: #2a5f8a; }
+  .tag-selfgrowth       { background: #fdecd9; color: #9a5c25; }
+  .tag-business         { background: #eae8f8; color: #4e48a0; }
+  .tag-none             { background: #f0f0f0; color: #888; }
+
+  .session-link a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, #b07d9e, #7b9eb8);
+    color: white;
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.78em;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+
+  .session-link a:hover { opacity: 0.85; }
+
+  .no-link {
+    font-size: 0.78em;
+    color: #bbb;
+    font-style: italic;
+    white-space: nowrap;
+  }
+
+  .hidden { display: none !important; }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    padding: 0 20px 16px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75em;
+    color: #555;
+  }
+
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✦ Resource Vault ✦</h1>
+  <p>Your A–Z Guide to All Session Recordings</p>
+</header>
+
+<div class="filters" id="filters">
+  <button class="filter-btn active" data-filter="all" onclick="filterCat(this,'all')">All Sessions</button>
+  <button class="filter-btn" data-filter="health-emotional" onclick="filterCat(this,'health-emotional')">Health – Emotional</button>
+  <button class="filter-btn" data-filter="health-physical" onclick="filterCat(this,'health-physical')">Health – Physical</button>
+  <button class="filter-btn" data-filter="health-mental" onclick="filterCat(this,'health-mental')">Health – Mental</button>
+  <button class="filter-btn" data-filter="selfgrowth" onclick="filterCat(this,'selfgrowth')">Self Growth / Spiritual</button>
+  <button class="filter-btn" data-filter="business" onclick="filterCat(this,'business')">Business / Wealth</button>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#c97bab"></div> Health – Emotional</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7ab8a0"></div> Health – Physical</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7aa3c9"></div> Health – Mental</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#e8a87c"></div> Self Growth / Spiritual</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#a09adc"></div> Business / Wealth</div>
+</div>
+
+<div class="az-bar" id="azBar"></div>
+
+<div class="container" id="vault"></div>
+
+<script>
+const sessions = [
+  { letter: 'E', name: 'Emotional Wellbeing & Oils', cat: 'health-emotional', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/3c881021?md=fed18b10f76442ec8dd62d260cfb87e7' },
+  { letter: 'F', name: 'Find Your Moment in Time', cat: 'selfgrowth', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/dfee3ff6?md=fe804ab890754cd0bf9af218ea490d47' },
+  { letter: 'G', name: 'Guided Sound Journey into the Womb', cat: 'selfgrowth', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/dfee3ff6?md=d2422408bf33479c88cc9e435600750a' },
+  { letter: 'H', name: 'Healing Your Birth Story', cat: 'selfgrowth', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/dfee3ff6?md=25543fd7df954d81909e7f487020ec4d' },
+  { letter: 'H', name: 'Hidden Code to Your Health & Vitality', cat: 'health-physical', link: '' },  { letter: 'I', name: 'I Release Any Energies & Emotions That Are Not Mine', cat: 'selfgrowth', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/dfee3ff6?md=917770abf3454feb99b9512bf387d63e' },
+  { letter: 'L', name: 'Letting Go Together', cat: 'health-emotional', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/3c881021?md=06caac31d1424e3ba2bc7defd4077431' },
+  { letter: 'M', name: 'Money Magnet Reset', cat: 'business', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/c56c08d3?md=7623edd5e4244fe3b8ba395dcebb91b8' },
+  { letter: 'T', name: 'Tired to Energised: A Smart Way to Feel Good While Building Your Business', cat: 'business', link: '' },
+  { letter: 'Y', name: 'Your Revenue Plateau Isn\'t a Marketing Problem', cat: 'business', link: '' },
+  { letter: 'N', name: 'Nature Connection Magic', cat: 'health-mental', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/3c881021?md=d9fe96566a624c9d828327b0b97dcd92' },
+  { letter: 'O', name: 'Overwhelm to Clarity', cat: 'health-mental', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/3c881021?md=4a8f1828632a42e0992f3796ce726f7e' },
+  { letter: 'P', name: 'Pelvic Floor Taboo', cat: 'health-physical', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/3c881021?md=03e1c6c33b674f22b1ce00427386174b' },
+  { letter: 'R', name: 'Release & Reset Together', cat: 'health-emotional', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/3c881021?md=06caac31d1424e3ba2bc7defd4077431' },
+  { letter: 'S', name: 'Simple, Sustainable Self-care', cat: 'health-emotional', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/3c881021?md=eb9d7e96bb0947d486c515b9150d88a7' },
+  { letter: 'S', name: 'Simplify & Save at Home', cat: 'business', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/c56c08d3?md=584f2bb9eda24ccbb8e02289d796d90d' },
+  { letter: 'S', name: 'Stop the Hunger & Tiredness Cycle', cat: 'health-physical', link: '' },
+  { letter: 'D', name: 'Discover Your Natural Glow & a Better Way to Care for Your Skin', cat: 'health-physical', link: '' },
+  { letter: 'T', name: 'Time Saving (Find Your Moment in Time)', cat: 'none', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/dfee3ff6?md=fe804ab890754cd0bf9af218ea490d47' },
+  { letter: 'H', name: 'Human Design: An Invitation to Experiment With Being Yourself', cat: 'selfgrowth', link: '' },
+  { letter: 'H', name: 'How to Feel Better in Midlife', cat: 'selfgrowth', link: '' },
+  { letter: 'P', name: 'Power of Womens Circles', cat: 'selfgrowth', link: '' },
+  { letter: 'Y', name: 'You Are All Psychic - Use it to Your Advantage', cat: 'selfgrowth', link: '' },
+  { letter: 'Y', name: 'Your Time is Now', cat: 'selfgrowth', link: 'https://www.skool.com/thrive-together-circle-1103/classroom/dfee3ff6?md=27ad7072c2444c67bea7aad28506bd70' },
+];
+
+const catLabels = {
+  'health-emotional': 'Health – Emotional',
+  'health-physical':  'Health – Physical',
+  'health-mental':    'Health – Mental',
+  'selfgrowth':       'Self Growth / Spiritual',
+  'business':         'Business / Wealth',
+  'none':             'Uncategorised'
+};
+
+const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const usedLetters = new Set(sessions.map(s => s.letter));
+
+// Build A–Z bar
+const azBar = document.getElementById('azBar');
+allLetters.forEach(l => {
+  const a = document.createElement('span');
+  a.textContent = l;
+  if (usedLetters.has(l)) {
+    a.style.cursor = 'pointer';
+    a.onclick = () => {
+      const target = document.getElementById(`letter-${l}`);
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    };
+  } else {
+    a.classList.add('empty');
+  }
+  azBar.appendChild(a);
+});
+
+// Build vault
+const vault = document.getElementById('vault');
+const grouped = {};
+sessions.forEach(s => {
+  if (!grouped[s.letter]) grouped[s.letter] = [];
+  grouped[s.letter].push(s);
+});
+
+Object.keys(grouped).sort().forEach(letter => {
+  const sec = document.createElement('div');
+  sec.className = 'letter-section';
+  sec.id = `letter-${letter}`;
+
+  const items = grouped[letter];
+  sec.innerHTML = `<div class="letter-heading">${letter} <span class="count">${items.length} session${items.length > 1 ? 's' : ''}</span></div>`;
+
+  items.forEach(s => {
+    const card = document.createElement('div');
+    card.className = `session-card cat-${s.cat}`;
+    card.dataset.cat = s.cat;
+
+    const tagLabel = catLabels[s.cat] || 'Uncategorised';
+    const linkHTML = s.link
+      ? `<div class="session-link"><a href="${s.link}" target="_blank">▶ Watch</a></div>`
+      : `<div class="no-link">Link coming soon</div>`;
+
+    card.innerHTML = `
+      <div class="session-info">
+        <div class="session-name">${s.name}</div>
+        <span class="session-tag tag-${s.cat}">${tagLabel}</span>
+      </div>
+      ${linkHTML}
+    `;
+    sec.appendChild(card);
+  });
+
+  vault.appendChild(sec);
+});
+
+// Filter
+function filterCat(btn, cat) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll('.session-card').forEach(card => {
+    if (cat === 'all' || card.dataset.cat === cat) {
+      card.classList.remove('hidden');
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+
+  // Hide/show letter sections if all cards inside are hidden
+  document.querySelectorAll('.letter-section').forEach(sec => {
+    const visible = sec.querySelectorAll('.session-card:not(.hidden)').length;
+    sec.style.display = visible ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
